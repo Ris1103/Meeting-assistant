@@ -1,0 +1,95 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "meeting-assistant"
+version = "0.1.0"
+description = "Cross-platform AI meeting assistant for Zoom, Microsoft Teams, and Google Meet"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+keywords = ["meeting", "assistant", "AI", "transcription", "speech-recognition"]
+authors = [{ name = "Meeting Assistant Team" }]
+
+dependencies = [
+    # Core ML — STT + diarization (wraps faster-whisper + pyannote.audio)
+    "faster-whisper>=1.0.0",
+    "anthropic>=0.25.0",
+
+    # Audio I/O
+    "sounddevice>=0.4.6",
+    "webrtcvad-wheels>=2.0.14",   # Voice activity detection (pre-built wheels)
+    "numpy>=1.26.0",
+    "scipy>=1.12.0",
+    "soundfile>=0.12.1",          # WAV read/write
+
+    # TTS
+    "edge-tts>=6.1.9",            # Primary TTS (free Microsoft voices, async)
+    "pyttsx3>=2.90",              # Offline fallback
+
+    # Platform integrations
+    "msal>=1.28.0",               # Microsoft Auth (Teams)
+    "google-auth>=2.29.0",        # Google Auth (Meet)
+    "google-auth-oauthlib>=1.2.0",
+    "requests>=2.31.0",
+    "httpx>=0.27.0",              # Async HTTP client
+    "websockets>=12.0",
+
+    # Config & data models
+    "pydantic>=2.7.0",
+    "pydantic-settings>=2.2.0",
+    "python-dotenv>=1.0.0",
+    "keyring>=25.2.0",            # Secure token storage
+
+    # CLI
+    "typer>=0.12.0",
+    "rich>=13.7.0",
+
+    # Retry / resilience
+    "tenacity>=8.3.0",
+]
+
+[project.optional-dependencies]
+# Full diarization support (requires HuggingFace token)
+diarization = [
+    "pyannote.audio>=3.1.1",
+    "torch>=2.2.0",
+    "torchaudio>=2.2.0",
+]
+# Windows-specific loopback capture
+windows = [
+    "pyaudiowpatch>=0.2.12",
+]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-mock>=3.14.0",
+    "pytest-cov>=5.0.0",
+    "ruff>=0.4.0",
+    "mypy>=1.10.0",
+]
+
+[project.scripts]
+meeting-assistant = "meeting_assistant.ui.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/meeting_assistant"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "-v --cov=src --cov-report=term-missing"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = false
+ignore_missing_imports = true
