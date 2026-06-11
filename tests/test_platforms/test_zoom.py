@@ -7,7 +7,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from meeting_assistant.config import Settings
-from meeting_assistant.models.schemas import Platform
 from meeting_assistant.platforms.zoom import ZoomAdapter
 
 

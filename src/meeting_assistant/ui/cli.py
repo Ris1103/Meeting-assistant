@@ -22,9 +22,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import sys
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich import print as rprint
@@ -60,10 +58,10 @@ def _setup_logging(verbose: bool = False) -> None:
 
 def _get_adapter(platform_name: str, config: Settings):
     """Instantiate the platform adapter for the given platform name."""
+    from meeting_assistant.platforms.base import NullPlatformAdapter
     from meeting_assistant.platforms.google_meet import GoogleMeetAdapter
     from meeting_assistant.platforms.teams import TeamsAdapter
     from meeting_assistant.platforms.zoom import ZoomAdapter
-    from meeting_assistant.platforms.base import NullPlatformAdapter
 
     mapping = {
         "zoom": ZoomAdapter,
@@ -86,10 +84,10 @@ def _get_adapter(platform_name: str, config: Settings):
 
 async def _auto_detect_platform(config: Settings):
     """Auto-detect which meeting platform is currently active."""
+    from meeting_assistant.platforms.base import NullPlatformAdapter
+    from meeting_assistant.platforms.google_meet import GoogleMeetAdapter
     from meeting_assistant.platforms.teams import TeamsAdapter
     from meeting_assistant.platforms.zoom import ZoomAdapter
-    from meeting_assistant.platforms.google_meet import GoogleMeetAdapter
-    from meeting_assistant.platforms.base import NullPlatformAdapter
 
     adapters = [
         TeamsAdapter(config),
@@ -246,7 +244,6 @@ def test_audio(
     _setup_logging(verbose)
 
     async def _run() -> None:
-        import numpy as np
         from meeting_assistant.core.audio_capture import AudioCaptureManager
 
         console.print(f"[cyan]Recording audio for {duration} seconds…[/cyan]")
@@ -281,9 +278,13 @@ def test_audio(
         if mic_rms_values:
             console.print(f"  Mic avg RMS: {sum(mic_rms_values)/len(mic_rms_values):.4f}")
         if loopback_rms_values:
-            console.print(f"  Loopback avg RMS: {sum(loopback_rms_values)/len(loopback_rms_values):.4f}")
+            avg = sum(loopback_rms_values) / len(loopback_rms_values)
+            console.print(f"  Loopback avg RMS: {avg:.4f}")
         else:
-            console.print("[yellow]  No loopback audio detected. Check your loopback device setup.[/yellow]")
+            console.print(
+                "[yellow]  No loopback audio detected. "
+                "Check your loopback device setup.[/yellow]"
+            )
 
     asyncio.run(_run())
 
@@ -298,6 +299,7 @@ def test_stt(
 
     async def _run() -> None:
         import numpy as np
+
         from meeting_assistant.core.audio_capture import AudioCaptureManager
         from meeting_assistant.core.transcription import TranscriptionEngine
 
@@ -433,7 +435,7 @@ def setup(
 @app.command()
 def transcribe(
     file: Path = typer.Argument(..., help="Path to audio file (WAV, MP3, etc.)"),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Save transcript to file"),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Save transcript to file"),
     verbose: bool = typer.Option(False, "--verbose", "-v"),
 ) -> None:
     """Transcribe an audio file offline using Whisper."""
@@ -446,6 +448,7 @@ def transcribe(
     async def _run() -> None:
         import numpy as np
         import soundfile as sf  # type: ignore[import]
+
         from meeting_assistant.core.transcription import TranscriptionEngine
 
         console.print(f"[cyan]Loading audio: {file}[/cyan]")
@@ -457,9 +460,12 @@ def transcribe(
 
         # Resample to 16kHz if needed
         if sample_rate != settings.audio_sample_rate:
-            console.print(f"[dim]Resampling from {sample_rate}Hz to {settings.audio_sample_rate}Hz…[/dim]")
-            from scipy.signal import resample_poly  # type: ignore[import]
+            console.print(
+                f"[dim]Resampling from {sample_rate}Hz to {settings.audio_sample_rate}Hz…[/dim]"
+            )
             from math import gcd
+
+            from scipy.signal import resample_poly  # type: ignore[import]
             g = gcd(settings.audio_sample_rate, sample_rate)
             audio_data = resample_poly(
                 audio_data,

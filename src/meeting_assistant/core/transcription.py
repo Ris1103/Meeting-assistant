@@ -144,13 +144,13 @@ class TranscriptionEngine:
             raise ImportError(
                 "faster-whisper is not installed. "
                 "Install with: pip install faster-whisper"
-            )
+            ) from None
 
     def _load_diarization(self) -> None:
         """Load pyannote diarization pipeline. Called from thread pool."""
         try:
-            from pyannote.audio import Pipeline  # type: ignore[import]
             import torch  # type: ignore[import]
+            from pyannote.audio import Pipeline  # type: ignore[import]
 
             self._diarize_pipeline = Pipeline.from_pretrained(
                 "pyannote/speaker-diarization-3.1",
@@ -235,7 +235,7 @@ class TranscriptionEngine:
                     end=seg.end,
                     text=seg.text.strip(),
                     confidence=avg_confidence,
-                    language=getattr(seg, "language", self._config.language) or self._config.language,
+                    language=getattr(seg, "language", None) or self._config.language,
                 )
             )
         return result
@@ -282,7 +282,7 @@ class TranscriptionEngine:
                         end=seg.end,
                         text=seg.text.strip(),
                         confidence=avg_confidence,
-                        language=getattr(seg, "language", self._config.language) or self._config.language,
+                        language=getattr(seg, "language", None) or self._config.language,
                     )
                 )
             return result

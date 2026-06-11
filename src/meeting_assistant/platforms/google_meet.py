@@ -21,11 +21,9 @@ Post-MVP:
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
-import os
 from collections.abc import AsyncGenerator
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -60,7 +58,7 @@ class GoogleMeetAdapter(PlatformAdapter):
         self._credentials = None
         self._http: httpx.AsyncClient | None = None
         self._access_token: str | None = None
-        self._token_expiry: datetime = datetime.min.replace(tzinfo=timezone.utc)
+        self._token_expiry: datetime = datetime.min.replace(tzinfo=UTC)
 
     # -----------------------------------------------------------------------
     # Detection
@@ -93,7 +91,7 @@ class GoogleMeetAdapter(PlatformAdapter):
 
     async def _ensure_credentials(self) -> str:
         """Return a valid Google OAuth2 access token."""
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if self._access_token and now < self._token_expiry - timedelta(minutes=5):
             return self._access_token
 
@@ -112,14 +110,14 @@ class GoogleMeetAdapter(PlatformAdapter):
     def _acquire_google_token(self) -> str:
         """Acquire Google OAuth2 token using google-auth-oauthlib (sync)."""
         try:
-            from google_auth_oauthlib.flow import InstalledAppFlow  # type: ignore[import]
-            from google.oauth2.credentials import Credentials  # type: ignore[import]
             import google.auth.transport.requests  # type: ignore[import]
+            from google.oauth2.credentials import Credentials  # type: ignore[import]
+            from google_auth_oauthlib.flow import InstalledAppFlow  # type: ignore[import]
         except ImportError:
             raise ImportError(
                 "google-auth-oauthlib is not installed. "
                 "Install with: pip install google-auth-oauthlib google-auth"
-            )
+            ) from None
 
         TOKEN_FILE.parent.mkdir(parents=True, exist_ok=True)
 
@@ -189,7 +187,7 @@ class GoogleMeetAdapter(PlatformAdapter):
             return metadata
 
         try:
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             time_min = (now - timedelta(minutes=30)).isoformat()
             time_max = (now + timedelta(minutes=30)).isoformat()
 

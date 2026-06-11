@@ -16,13 +16,10 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import platform
 import queue
-import struct
 import subprocess
-import sys
 import time
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 
 import numpy as np
 
@@ -152,8 +149,10 @@ class AudioCaptureManager:
         # Unified async queue: mixes both sources
         self._output_q: asyncio.Queue[AudioChunk] = asyncio.Queue(maxsize=200)
 
-        self._mic_stream: sd.InputStream | None = None
-        self._loopback_stream: sd.InputStream | None = None
+        # sounddevice.InputStream (or pyaudio stream on Windows); typed loosely
+        # because sounddevice is imported lazily
+        self._mic_stream = None
+        self._loopback_stream = None
         self._running = False
         self._loop: asyncio.AbstractEventLoop | None = None
         self._tasks: list[asyncio.Task] = []
@@ -167,7 +166,11 @@ class AudioCaptureManager:
         self._loop = asyncio.get_running_loop()
         self._running = True
 
-        logger.info("Starting audio capture (OS: %s, sample_rate: %d Hz)", self._os_name, self._sample_rate)
+        logger.info(
+            "Starting audio capture (OS: %s, sample_rate: %d Hz)",
+            self._os_name,
+            self._sample_rate,
+        )
 
         # Start microphone capture
         import sounddevice as sd  # lazy import
@@ -190,7 +193,9 @@ class AudioCaptureManager:
         # Background tasks to drain the raw queues into the async output queue
         self._tasks = [
             asyncio.create_task(self._drain_queue(self._mic_q, "mic"), name="drain-mic"),
-            asyncio.create_task(self._drain_queue(self._loopback_q, "loopback"), name="drain-loopback"),
+            asyncio.create_task(
+                self._drain_queue(self._loopback_q, "loopback"), name="drain-loopback"
+            ),
         ]
 
     async def stop(self) -> None:
@@ -221,7 +226,7 @@ class AudioCaptureManager:
             try:
                 chunk = await asyncio.wait_for(self._output_q.get(), timeout=1.0)
                 yield chunk
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 continue
             except asyncio.CancelledError:
                 break

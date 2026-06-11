@@ -2,16 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
 from meeting_assistant.config import Settings
 from meeting_assistant.core.transcription import TranscriptionEngine
-from meeting_assistant.models.schemas import SpeakerSegment, TranscriptionResult
-
+from meeting_assistant.models.schemas import TranscriptionResult
 
 # ---------------------------------------------------------------------------
 # Mock Whisper segment helper

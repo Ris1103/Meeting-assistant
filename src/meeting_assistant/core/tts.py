@@ -161,7 +161,6 @@ class TTSEngine:
     def _play_with_os_player(audio_bytes: bytes) -> None:
         """Write MP3 to a temp file and play with the OS default player."""
         import subprocess
-        import sys
 
         with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as f:
             f.write(audio_bytes)
@@ -184,7 +183,6 @@ class TTSEngine:
                     except (FileNotFoundError, subprocess.CalledProcessError):
                         continue
             elif system == "Windows":
-                import winsound  # type: ignore[import]
 
                 # winsound doesn't support MP3; fall through silently
                 logger.warning("Install pydub for Windows audio playback.")

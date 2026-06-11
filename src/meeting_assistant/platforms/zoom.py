@@ -18,7 +18,6 @@ Auth config required (for REST API, not needed for MVP):
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import re
 from collections.abc import AsyncGenerator

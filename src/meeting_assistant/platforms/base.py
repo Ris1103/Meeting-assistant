@@ -11,7 +11,6 @@ so these adapters focus exclusively on:
 
 from __future__ import annotations
 
-import asyncio
 import logging
 from abc import ABC, abstractmethod
 from collections.abc import AsyncGenerator

@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from meeting_assistant.config import Settings
-from meeting_assistant.models.schemas import ChatMessage, Platform
+from meeting_assistant.models.schemas import Platform
 from meeting_assistant.platforms.teams import TeamsAdapter
 
 
@@ -84,8 +84,8 @@ class TestTeamsAdapterMetadata:
         )
         adapter = TeamsAdapter(settings)
         adapter._access_token = "fake-token"
-        adapter._token_expires_at = datetime.now(timezone.utc).replace(
-            year=datetime.now(timezone.utc).year + 1
+        adapter._token_expires_at = datetime.now(UTC).replace(
+            year=datetime.now(UTC).year + 1
         )
 
         mock_event = {
@@ -126,7 +126,7 @@ class TestTeamsAdapterChat:
         adapter = TeamsAdapter(settings)
         adapter._active_chat_id = "19:fake-thread@thread.v2"
         adapter._access_token = "fake-token"
-        adapter._token_expires_at = datetime(2099, 1, 1, tzinfo=timezone.utc)
+        adapter._token_expires_at = datetime(2099, 1, 1, tzinfo=UTC)
         return adapter
 
     @pytest.mark.asyncio

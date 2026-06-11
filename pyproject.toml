@@ -88,6 +88,13 @@ src = ["src"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+ignore = [
+    "B008",  # typer.Option/Argument in defaults is the canonical typer pattern
+    "B027",  # empty non-abstract methods in ABCs are intentional default impls
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/test_audio_capture.py" = ["E402"]  # sounddevice mock must precede imports
 
 [tool.mypy]
 python_version = "3.11"

@@ -15,7 +15,6 @@ import logging
 import re
 from collections import deque
 from datetime import datetime
-from typing import Any
 
 from meeting_assistant.config import Settings
 from meeting_assistant.models.schemas import (

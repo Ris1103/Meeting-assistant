@@ -20,7 +20,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from collections.abc import AsyncGenerator
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import httpx
@@ -66,7 +66,7 @@ class TeamsAdapter(PlatformAdapter):
     def __init__(self, config: Settings) -> None:
         self._config = config
         self._access_token: str | None = None
-        self._token_expires_at: datetime = datetime.min.replace(tzinfo=timezone.utc)
+        self._token_expires_at: datetime = datetime.min.replace(tzinfo=UTC)
         self._http: httpx.AsyncClient | None = None
         self._active_chat_id: str | None = None
         self._seen_message_ids: set[str] = set()
@@ -98,7 +98,7 @@ class TeamsAdapter(PlatformAdapter):
 
     async def _ensure_token(self) -> str:
         """Return a valid access token, refreshing if needed."""
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if self._access_token and now < self._token_expires_at - timedelta(minutes=5):
             return self._access_token
 
@@ -121,7 +121,7 @@ class TeamsAdapter(PlatformAdapter):
         except ImportError:
             raise ImportError(
                 "msal is not installed. Install with: pip install msal"
-            )
+            ) from None
 
         loop = asyncio.get_running_loop()
 
@@ -205,7 +205,7 @@ class TeamsAdapter(PlatformAdapter):
 
         try:
             # Find current/upcoming online meeting via Calendar
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             start = (now - timedelta(minutes=30)).isoformat()
             end = (now + timedelta(minutes=30)).isoformat()
 

@@ -25,11 +25,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import sys
 import time
-from collections.abc import AsyncGenerator
-from datetime import datetime
-from pathlib import Path
 
 import numpy as np
 
@@ -39,7 +35,7 @@ from meeting_assistant.core.context_tracker import MeetingContextTracker
 from meeting_assistant.core.llm_client import ClaudeClient
 from meeting_assistant.core.transcription import TranscriptionEngine
 from meeting_assistant.core.tts import TTSEngine
-from meeting_assistant.models.schemas import AudioChunk, MeetingStatus, Platform
+from meeting_assistant.models.schemas import MeetingStatus, Platform
 from meeting_assistant.platforms.base import PlatformAdapter
 
 logger = logging.getLogger(__name__)
@@ -129,7 +125,10 @@ class MeetingAssistantPipeline:
         self._running = True
         self._status = MeetingStatus.ACTIVE
 
-        logger.info("Pipeline active — say '%s' to trigger the assistant.", self._config.trigger_keyword)
+        logger.info(
+            "Pipeline active — say '%s' to trigger the assistant.",
+            self._config.trigger_keyword,
+        )
 
         # Launch concurrent pipeline tasks
         self._tasks = [
@@ -208,7 +207,9 @@ class MeetingAssistantPipeline:
 
                 # Also flush if buffer exceeds max duration
                 total_samples = sum(a.shape[0] for a in buffer)
-                max_samples = int(self._config.transcription_buffer_seconds * self._config.audio_sample_rate)
+                max_samples = int(
+                    self._config.transcription_buffer_seconds * self._config.audio_sample_rate
+                )
                 if total_samples >= max_samples:
                     await self._flush_audio_buffer(buffer)
                     buffer = []

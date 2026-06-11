@@ -7,8 +7,6 @@ See .env.example for the full list of available settings.
 from __future__ import annotations
 
 import platform
-import sys
-from typing import Optional
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -69,7 +67,7 @@ class Settings(BaseSettings):
     # Audio capture
     # -----------------------------------------------------------------------
     loopback_device_name: str = ""  # auto-detect when empty
-    mic_device_index: Optional[int] = None
+    mic_device_index: int | None = None
     audio_sample_rate: int = 16_000  # Hz — Whisper optimal
     vad_frame_duration_ms: int = 30  # must be 10, 20, or 30
     vad_aggressiveness: int = 2  # 0–3

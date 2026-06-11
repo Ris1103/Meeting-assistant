@@ -8,7 +8,7 @@ import pytest
 
 from meeting_assistant.config import Settings
 from meeting_assistant.core.llm_client import ClaudeClient, _split_at_boundary
-from meeting_assistant.models.schemas import MeetingContext, Platform
+from meeting_assistant.models.schemas import MeetingContext
 
 
 class TestSentenceSplitting:
@@ -54,10 +54,6 @@ class TestClaudeClient:
 
             async def __aexit__(self, *args):
                 pass
-
-            async def text_stream(self):
-                for chunk in self._chunks:
-                    yield chunk
 
             text_stream = property(lambda self: self._text_stream())
 

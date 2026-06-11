@@ -3,10 +3,8 @@
 from __future__ import annotations
 
 import asyncio
-import queue
 import sys
-import time
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
@@ -19,7 +17,6 @@ sys.modules.setdefault("sounddevice", _mock_sd)
 from meeting_assistant.config import Settings
 from meeting_assistant.core.audio_capture import (
     AudioCaptureManager,
-    AudioDeviceError,
     _find_blackhole_device,
     _find_pulseaudio_monitor,
     _get_default_loopback_device,
@@ -96,7 +93,9 @@ class TestAudioDeviceDiscovery:
         """Returns None when BlackHole is not installed."""
         with patch(
             "sounddevice.query_devices",
-            return_value=[{"name": "Built-in Microphone", "max_input_channels": 1, "max_output_channels": 0}],
+            return_value=[
+                {"name": "Built-in Microphone", "max_input_channels": 1, "max_output_channels": 0}
+            ],
         ):
             result = _find_blackhole_device()
         assert result is None
@@ -130,14 +129,12 @@ class TestAudioCaptureManager:
 
     def test_init_creates_queues(self, manager: AudioCaptureManager) -> None:
         """Manager initialises with correct queue types."""
-        import asyncio
         assert hasattr(manager, "_output_q")
         assert isinstance(manager._output_q, asyncio.Queue)
 
     @pytest.mark.asyncio
     async def test_drain_queue_yields_chunks(self, manager: AudioCaptureManager) -> None:
         """_drain_queue converts thread queue entries to AudioChunks in output queue."""
-        import asyncio
 
         manager._loop = asyncio.get_running_loop()
         manager._running = True
@@ -178,7 +175,6 @@ class TestAudioCaptureManager:
         self, manager: AudioCaptureManager
     ) -> None:
         """stop() cancels tasks and marks running=False."""
-        import asyncio
 
         manager._running = True
         mock_task = asyncio.create_task(asyncio.sleep(100))

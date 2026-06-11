@@ -13,12 +13,9 @@ Features:
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import re
-from collections.abc import AsyncGenerator, Callable
-from datetime import datetime
-from typing import Awaitable
+from collections.abc import AsyncGenerator, Awaitable, Callable
 
 import anthropic
 from tenacity import (

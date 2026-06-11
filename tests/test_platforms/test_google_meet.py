@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import UTC
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -106,8 +107,8 @@ class TestGoogleMeetMetadata:
         adapter = GoogleMeetAdapter(settings)
         adapter._access_token = "fake-token"
 
-        from datetime import datetime, timezone, timedelta
-        adapter._token_expiry = datetime.now(timezone.utc) + timedelta(hours=1)
+        from datetime import datetime, timedelta
+        adapter._token_expiry = datetime.now(UTC) + timedelta(hours=1)
 
         mock_event = {
             "summary": "Product Review",
